@@ -3,7 +3,7 @@ Learn your vocabulary by playing games !
 
 ## installation
 `git clone https://github.com/Miniflint/pygame-vocabulary/` or `download ZIP`
-and (this)[modules]
+and [this](modules)
 
 ## requirement
 ### modules
