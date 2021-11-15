@@ -7,15 +7,16 @@ from datetime import date
 import unicodedata
 
 parser = argparse.ArgumentParser(description="Change la langue ou ajoute ton dictionnaire")
-parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang1:lang2 (ita:fr) ou l'inverse | fr = trouver fr (fr, ita, random)")
-parser.add_argument("-a", "--add", action="store_true", help="Ajoute ton vocabulaire, pas besoin d'argument")
-parser.add_argument("-s", "--surprise", type=str, help="Surprise :) [hard/medium/easy/EZ]")
+parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang1:lang2 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
+parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
+parser.add_argument("-g", "--game", type=str, help="Game :) [hard/medium/easy/EZ]")
+parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
 args = parser.parse_args()
 
 pygame.init()
 WIDTH, HEIGHT = 1920, 1080
 SCREEN = pygame.display.set_mode([WIDTH, HEIGHT])
-pygame.display.set_caption("ASTEROID GAME FOR LYLAH")
+pygame.display.set_caption("ASTEROID GAME")
 FAIL, SUCCESS = 0, 0
 
 class bcolors:
@@ -36,10 +37,10 @@ def answer(nb = False):
         print(bcolors.FAIL + "Mauvaise réponse" + bcolors.ENDC)
     print("\n")
 
-def moveLocation(itapath, path,lineNb):
-    with open(itapath, "r") as file:
+def moveLocation(file_path, path,lineNb):
+    with open(file_path, "r") as file:
         lines = file.readlines()
-    with open(itapath, 'w') as fp:
+    with open(file_path, 'w') as fp:
         for number, line in enumerate(lines):
             if number is not lineNb:
                 fp.write(line)
@@ -62,6 +63,9 @@ def lineInFile(pathStr):
         return 0
 
 def readFile(pathStr):
+    if (not os.path.isfile(pathStr)):
+        print("Specified path doesn't exists")
+        exit()
     rdm = random.randint(1, lineInFile(pathStr))
     f = open(pathStr, "r")
     strLines = f.readlines()
@@ -69,10 +73,10 @@ def readFile(pathStr):
     f.close()
     return strFormat[0], strFormat[1], rdm
 
-def checkLangxd(pathFile, checkLang = "ita"):
-    if (checkLang == "ita"):
+def checkLangxd(pathFile, checkLang = "lang1"):
+    if (checkLang == "lang1"):
         result, motATrouver, lineNb = readFile(pathFile)
-    elif (checkLang == "fr"):
+    elif (checkLang == "lang2"):
         motATrouver, result, lineNb = readFile(pathFile)
     elif (checkLang == "random"):
         rdm = random.randint(1, 2)
@@ -82,7 +86,7 @@ def checkLangxd(pathFile, checkLang = "ita"):
             motATrouver, result, lineNb = readFile(pathFile)
     return motATrouver, result, lineNb
 
-def italian(pathFile, tries, failNb, checkLang = "ita"):
+def questions(pathFile, tries, failNb, checkLang = "lang1"):
     while (tries >= 0):
         motATrouver, result, lineNb = checkLangxd(pathFile, checkLang)
         print("Question : " + motATrouver)
@@ -101,7 +105,7 @@ def italian(pathFile, tries, failNb, checkLang = "ita"):
 
 def cleanup_folder():
     counter = 0
-    date_today = date.today().strftime("%m_%d_%y")
+    date_today = date.today().strftime("%H_%m_%d_%y")
     if (not os.path.isdir(date_today)):
         os.mkdir(date_today)
     for file in os.listdir(os.getcwd()):
@@ -110,30 +114,31 @@ def cleanup_folder():
             counter += 1
             os.rename(file, f"{date_today}/{new_file}")
 
-def AddToTxt():
-    add_to_existing = input("Add to existing file [yes/no] : ").lower()
-    if (add_to_existing == "no"):
+def add_to_txt(filePath):
+    if (os.path.isfile(filePath)):
+        add_to_existing = input("Ajouter au fichier existant [yes/no] : ").lower()
+        if (add_to_existing == "no"):
+            cleanup_folder()
+    clean_foler = input("Clean the folder ? (Remove everything and add it to another folder) [yes/no] : ").lower()
+    if (clean_foler == "yes"):
         cleanup_folder()
-    else:
-        pass
-    f = open("ita.txt", "a")
+    f = open(filePath, "a")
     while True:
-        get_ita = input("Entre le mot en italien : ")
-        get_fra = input("Entre la traduction fançaise : ")
+        get_ita = input("Entre le mot : ")
+        get_fra = input("Entre la sa traduction : ")
         if (get_ita == "EXIT()" or get_fra == "EXIT()"):
             f.close()
             return
         f.write(f"{get_ita}:{get_fra}\n")
 
-def base(argv = "ita"):
-    pathToIta = "ita.txt"
-    numberOfLine = lineInFile(pathToIta)
+def base(file_path, argv = "lang1"):
+    numberOfLine = lineInFile(file_path)
     if numberOfLine:
         failNb = 0
-        finish = italian(pathToIta,numberOfLine, failNb, argv)
-        if (finish == 1):
+        finish = questions(file_path,numberOfLine, failNb, argv)
+        if (finish >= 1):
             while (finish >= 1):
-                italian(f"Fail{failNb}.txt", numberOfLine, failNb, argv)
+                questions(f"Fail{failNb}.txt", numberOfLine, failNb, argv)
                 failNb += 1
 
 class COLOR():
@@ -144,28 +149,24 @@ class COLOR():
     light_sky = (141,182,205)
 
 class TextBox(object):
-    def __init__(self, text, x, y):
+    def __init__(self, text:str, x:int, y:int):
         self.text = text
         self.x = x
         self.y = y
-        self.font_text = pygame.font.SysFont('Helvetica', 30)
-        self.font_input = pygame.font.SysFont('Arial', 30)
+        self.font_text = pygame.font.SysFont("Helvetica", 30)
 
     def display_text(self):
         textsurface = self.font_text.render(self.text, True, COLOR.white)
         SCREEN.blit(textsurface,(self.x, self.y))
-    
-    def display_input(self):
-        textsurface = self.font_input.render(self.text, True, COLOR.white)
-        SCREEN.blit(textsurface,(self.x, self.y))
 
 class ScreenChanger():
-    def __init__(self, text, screen_color, speed):
+    def __init__(self, text, screen_color, speed, path):
         self.text = text
         self.x = (WIDTH / 2) - 50
         self.y = (HEIGHT / 2) - 25
         self.screen_color = screen_color
         self.speed = speed
+        self.path = path
 
     def change_screen(self):
         text = TextBox(self.text, self.x, self.y)
@@ -181,7 +182,7 @@ class ScreenChanger():
             text.display_text()
             pygame.display.update()
             pygame.time.delay(800)
-            base_game(self.speed)
+            base_game(self.speed, self.path)
 
 def enemies(text, rdm, ycoord, xcoord = (WIDTH / 2)):
     text = TextBox(text, xcoord - 50, ycoord)
@@ -203,18 +204,18 @@ def remove_accents(input_str):
     only_ascii = nfkd_form.encode('ASCII', 'ignore')
     return only_ascii
 
-def base_game(game_speed):
+def base_game(game_speed, file_path):
     global FAIL, SUCCESS
     margin_down = 100
-    motATrouver, result, lineNb = readFile("ita.txt")
+    motATrouver, result, lineNb = readFile(file_path)
     x, y= random.randint(50, (WIDTH - (len(motATrouver) * 15))), -10
     placement = [(WIDTH / 2), (HEIGHT - margin_down), (WIDTH / 2), (HEIGHT - margin_down) + 3]
     user_input, stored_input = "", ""
     background_image = pygame.image.load("assets/background_1.jpg").convert_alpha()
     background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
-    text_lose, screen_lose = TextBox(f"Fail : {str(FAIL)}", 10, 10), ScreenChanger("You LOSE", COLOR.red, game_speed)
-    text_win, screen_win = TextBox(f"Win : {str(SUCCESS)}", (WIDTH - 100), 13), ScreenChanger("You WIN", COLOR.green, game_speed)
+    text_lose, screen_lose = TextBox(f"Fail : {str(FAIL)}", 10, 10), ScreenChanger("You LOSE", COLOR.red, game_speed, file_path)
+    text_win, screen_win = TextBox(f"Win : {str(SUCCESS)}", (WIDTH - 100), 13), ScreenChanger("You WIN", COLOR.green, game_speed, file_path)
     input_rect = pygame.Rect(50, (placement[1] + 25), (WIDTH - 100), 45)
     while True:
         SCREEN.blit(background_image, (0, 0))
@@ -239,7 +240,7 @@ def base_game(game_speed):
                     else:
                         user_input += event.unicode
         enemies(motATrouver, x, y, x)
-        all_kind_of_text(user_answer.display_input(), text_win.display_text(), text_lose.display_text())
+        all_kind_of_text(user_answer.display_text(), text_win.display_text(), text_lose.display_text())
         if (y >= placement[1]):
             FAIL += 1
             screen_lose.change_screen()
@@ -251,20 +252,22 @@ def base_game(game_speed):
 
 def main():
     game_speed = 25
+    file_path = "ita.txt"
+    if (args.file):
+        file_path = args.file
     if (args.add):
-        AddToTxt()
-    elif (args.lang):
-        base(args.lang)
-    elif (args.surprise):
-        if (args.surprise == "hard"):
-            game_speed = 15
-        elif (args.surprise == "medium"):
-            game_speed = 25
-        elif (args.surprise == "easy"):
-            game_speed = 35
-        elif (args.surprise == "EZ"):
-            game_speed = 5
-    base_game(game_speed)
+       add_to_txt(file_path)
+       exit()
+    if (args.lang):
+        base(file_path, args.lang)
+        exit()
+    else:
+        if (args.game == "hard"):       game_speed = 15
+        elif (args.game == "medium"):   game_speed = 25
+        elif (args.game == "easy"):     game_speed = 35
+        elif (args.game == "EZ"):       game_speed = 5
+        base_game(game_speed, file_path)
+
 
 if __name__ == "__main__":
     main()
