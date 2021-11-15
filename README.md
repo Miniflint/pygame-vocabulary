@@ -8,17 +8,12 @@ and [this](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#mo
 
 ## requirement
 ### modules
-os          '#'
-
+'#'os
 pygame
-
-random      '#'
-
-argparse    '#'
-
-date        '#'
-
-unicodedata '#'
+'#'random
+'#'argparse
+'#'date
+'#'unicodedata 
 
 
 '#' = doesn't need to import it. they come with python
