@@ -9,11 +9,17 @@ and [this](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#mo
 ## requirement
 ### modules
 os          '#'
+
 pygame
+
 random      '#'
+
 argparse    '#'
+
 date        '#'
+
 unicodedata '#'
+
 
 '#' = doesn't need to import it. they come with python
 `pip3 install pygame` or, if you don't have sudo privilèges `pip3 install --user pygame`
