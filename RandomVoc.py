@@ -11,6 +11,7 @@ parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou
 parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
 parser.add_argument("-g", "--game", type=str, help="Game :) [hard/medium/easy/EZ]")
 parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
+parser.add_argument("-c", "--cheating", action="store_true", help=argparse.SUPPRESS)
 args = parser.parse_args()
 
 pygame.init()
@@ -225,6 +226,8 @@ def base_game(game_speed, file_path):
     text_lose, screen_lose = TextBox(f"Fail : {str(FAIL)}", 10, 10), ScreenChanger("You LOSE", COLOR.red, game_speed, file_path)
     text_win, screen_win = TextBox(f"Win : {str(SUCCESS)}", (WIDTH - (len(str(SUCCESS)) * 30) - 70), 13), ScreenChanger("You WIN", COLOR.green, game_speed, file_path)
     input_rect = pygame.Rect(50, (placement[1] + 25), (WIDTH - 100), 45)
+    if (args.cheating):
+        print(result)
     while True:
         SCREEN.blit(background_image, (0, 0))
         user_answer = TextBox(user_input, input_rect.x + 10, input_rect.y + 10)
