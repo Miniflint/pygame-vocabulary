@@ -282,6 +282,5 @@ def main():
         elif (args.game == "EZ"):       game_speed = 5
         base_game(game_speed, file_path)
 
-
 if __name__ == "__main__":
     main()
