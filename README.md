@@ -22,4 +22,6 @@ pygame
 
 
 '#' = doesn't need to import it. they come with python
+
+### pygame installation
 `pip3 install pygame` or, if you don't have sudo privilèges `pip3 install --user pygame`
