@@ -4,7 +4,9 @@ Learn your vocabulary by playing games !
 ## installation
 `git clone https://github.com/Miniflint/pygame-vocabulary/` or `download ZIP`
 
-and [this](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#module)
+[Requirement](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#requirement)
+
+[Pygame installation](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#pygame)
 
 ## requirement
 ### modules
@@ -22,4 +24,6 @@ pygame
 
 
 '#' = doesn't need to import it. they come with python
+
+### pygame
 `pip3 install pygame` or, if you don't have sudo privilèges `pip3 install --user pygame`
