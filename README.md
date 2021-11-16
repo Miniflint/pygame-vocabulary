@@ -2,7 +2,7 @@
 Learn your vocabulary by playing games !
 
 ## installation
-`git clone https://github.com/Miniflint/pygame-vocabulary/` or `download ZIP`
+`git clone https://github.com/Miniflint/pygame-vocabulary` or `download ZIP`
 
 [Requirement](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#requirement)
 
