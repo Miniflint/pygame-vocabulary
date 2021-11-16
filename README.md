@@ -5,6 +5,7 @@ Learn your vocabulary by playing games !
 `git clone https://github.com/Miniflint/pygame-vocabulary/` or `download ZIP`
 
 [Requirement](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#requirement)
+
 [Pygame installation](https://github.com/Miniflint/pygame-vocabulary/blob/main/README.md#pygame)
 
 ## requirement
