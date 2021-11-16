@@ -10,7 +10,7 @@ parser = argparse.ArgumentParser(description="Change la langue ou ajoute ton dic
 parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
 parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
 parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
-parser.add_argument("-d", "--difficulty", type=str, help="hard/medium/easy/EZ]")
+parser.add_argument("-d", "--difficulty", type=str, help="[hard/medium/easy/EZ]")
 parser.add_argument("-i", "--increase", action="store_true", help="Ajoute de la difficulté et augmente de la vitesse au fur est a mesure")
 parser.add_argument("-c", "--cc", action="store_true", help=argparse.SUPPRESS)
 args = parser.parse_args()
@@ -79,7 +79,9 @@ def readFile(pathStr):
         print("No line in this file")
     return None, None, None
 
-def checkLangxd(pathFile, checkLang = "lang1"):
+def checkLangxd(pathFile, checkLang = "lang2"):
+    if (args.lang):
+        checkLang = args.lang
     if (checkLang == "lang1"):
         result, motATrouver, lineNb = readFile(pathFile)
     elif (checkLang == "lang2"):
@@ -218,7 +220,7 @@ def base_game(game_speed, file_path):
     margin_down = 100
     if (args.increase):
         add_speed += 0.05
-    motATrouver, result, lineNb = readFile(file_path)
+    motATrouver, result, lineNb = checkLangxd(file_path, )
     if (not motATrouver and not result and not lineNb):
         exit()
     x, y= random.randint(50, (WIDTH - (len(motATrouver) * 15))), -10
@@ -276,9 +278,9 @@ def main():
     if (args.add):
        add_to_txt(file_path)
        exit()
-    if (args.lang):
-        base(file_path, args.lang)
-        exit()
+    #if (args.lang):
+        #base(file_path, args.lang)
+        #exit()
     else:
         if (args.difficulty == "hard"):       game_speed = 15
         elif (args.difficulty == "medium"):   game_speed = 25
