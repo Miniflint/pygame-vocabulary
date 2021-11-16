@@ -7,7 +7,7 @@ from datetime import date
 import unicodedata
 
 parser = argparse.ArgumentParser(description="Change la langue ou ajoute ton dictionnaire")
-parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang1:lang2 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
+parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
 parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
 parser.add_argument("-g", "--game", type=str, help="Game :) [hard/medium/easy/EZ]")
 parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
@@ -37,17 +37,17 @@ def answer(nb = False):
         print(bcolors.FAIL + "Mauvaise réponse" + bcolors.ENDC)
     print("\n")
 
-def moveLocation(file_path, path,lineNb):
+def moveLocation(file_path, path, line_nb):
+    line_nb -= 1
     with open(file_path, "r") as file:
         lines = file.readlines()
     with open(file_path, 'w') as fp:
         for number, line in enumerate(lines):
-            if number is not lineNb:
+            if number is not line_nb:
                 fp.write(line)
             else:
-                f = open(path, "a")
-                f.write(line)
-                f.close
+                with open(path, "a") as f:
+                    f.write(line)
 
 def lineInFile(pathStr):
     if os.path.isfile(pathStr):
@@ -66,12 +66,16 @@ def readFile(pathStr):
     if (not os.path.isfile(pathStr)):
         print("Specified path doesn't exists")
         exit()
-    rdm = random.randint(1, lineInFile(pathStr))
-    f = open(pathStr, "r")
-    strLines = f.readlines()
-    strFormat = strLines[rdm - 1].rstrip("\n").split(":")
-    f.close()
-    return strFormat[0], strFormat[1], rdm
+    try:
+        rdm = random.randint(1, lineInFile(pathStr))
+        f = open(pathStr, "r")
+        strLines = f.readlines()
+        strFormat = strLines[rdm - 1].rstrip("\n").split(":")
+        f.close()
+        return strFormat[0], strFormat[1], rdm
+    except:
+        print("No line in this file")
+    return None, None, None
 
 def checkLangxd(pathFile, checkLang = "lang1"):
     if (checkLang == "lang1"):
@@ -87,6 +91,7 @@ def checkLangxd(pathFile, checkLang = "lang1"):
     return motATrouver, result, lineNb
 
 def questions(pathFile, tries, failNb, checkLang = "lang1"):
+    tries -= 1
     while (tries >= 0):
         motATrouver, result, lineNb = checkLangxd(pathFile, checkLang)
         print("Question : " + motATrouver)
@@ -95,11 +100,11 @@ def questions(pathFile, tries, failNb, checkLang = "lang1"):
             input("Press any key to get out")
             exit()
         elif (checkAnswer != result):
+            moveLocation(pathFile,f"Fail{failNb}.txt", lineNb)
             answer()
-            moveLocation(pathFile,f"Fail{failNb}.txt", lineNb - 1)
         elif (checkAnswer == result):
+            moveLocation(pathFile, "Success.txt", lineNb)
             answer(True)
-            moveLocation(pathFile, "Success.txt", lineNb - 1)
         tries -= 1
     return 1
 
@@ -116,12 +121,13 @@ def cleanup_folder():
 
 def add_to_txt(filePath):
     if (os.path.isfile(filePath)):
-        add_to_existing = input("Ajouter au fichier existant [yes/no] : ").lower()
-        if (add_to_existing == "no"):
+        add_to_existing = input("Ajouter au fichier existant [[Y]yes/[N]no] : ").lower()
+        if (add_to_existing == "no" or add_to_existing == "n"):
             cleanup_folder()
-    clean_foler = input("Clean the folder ? (Remove everything and add it to another folder) [yes/no] : ").lower()
-    if (clean_foler == "yes"):
-        cleanup_folder()
+    else:
+        clean_foler = input("Clean the folder ? (Remove everything and add it to another folder) [yes/no] : ").lower()
+        if (clean_foler == "yes" or clean_foler == "y"):
+            cleanup_folder()
     f = open(filePath, "a")
     while True:
         get_ita = input("Entre le mot : ")
@@ -153,7 +159,7 @@ class TextBox(object):
         self.text = text
         self.x = x
         self.y = y
-        self.font_text = pygame.font.SysFont("Helvetica", 30)
+        self.font_text = pygame.font.SysFont("ヒラキノ角コシックw2", 30)
 
     def display_text(self):
         textsurface = self.font_text.render(self.text, True, COLOR.white)
@@ -208,6 +214,8 @@ def base_game(game_speed, file_path):
     global FAIL, SUCCESS
     margin_down = 100
     motATrouver, result, lineNb = readFile(file_path)
+    if (not motATrouver and not result and not lineNb):
+        exit()
     x, y= random.randint(50, (WIDTH - (len(motATrouver) * 15))), -10
     placement = [(WIDTH / 2), (HEIGHT - margin_down), (WIDTH / 2), (HEIGHT - margin_down) + 3]
     user_input, stored_input = "", ""
@@ -215,7 +223,7 @@ def base_game(game_speed, file_path):
     background_image = pygame.transform.scale(background_image, (WIDTH, HEIGHT))
 
     text_lose, screen_lose = TextBox(f"Fail : {str(FAIL)}", 10, 10), ScreenChanger("You LOSE", COLOR.red, game_speed, file_path)
-    text_win, screen_win = TextBox(f"Win : {str(SUCCESS)}", (WIDTH - 100), 13), ScreenChanger("You WIN", COLOR.green, game_speed, file_path)
+    text_win, screen_win = TextBox(f"Win : {str(SUCCESS)}", (WIDTH - (len(str(SUCCESS)) * 30) - 70), 13), ScreenChanger("You WIN", COLOR.green, game_speed, file_path)
     input_rect = pygame.Rect(50, (placement[1] + 25), (WIDTH - 100), 45)
     while True:
         SCREEN.blit(background_image, (0, 0))
@@ -231,9 +239,11 @@ def base_game(game_speed, file_path):
                         stored_input = user_input
                         if (remove_accents(stored_input) == remove_accents(result) and y < placement[1]):
                             SUCCESS += 1
+                            moveLocation(file_path, "success.txt", lineNb)
                             screen_win.change_screen()
                         else:
                             FAIL += 1
+                            moveLocation(file_path, "Fail.txt", lineNb)
                             screen_lose.change_screen()
                     elif (event.key == pygame.K_BACKSPACE):
                         user_input = user_input[:-1]
@@ -243,6 +253,7 @@ def base_game(game_speed, file_path):
         all_kind_of_text(user_answer.display_text(), text_win.display_text(), text_lose.display_text())
         if (y >= placement[1]):
             FAIL += 1
+            moveLocation(file_path, "Fail.txt", lineNb)
             screen_lose.change_screen()
         pygame.draw.rect(SCREEN, COLOR.light_sky, input_rect, 3)
         pygame.draw.line(SCREEN, COLOR.white, (placement[0], placement[1]), (placement[2], placement[3]), (WIDTH - 50))
