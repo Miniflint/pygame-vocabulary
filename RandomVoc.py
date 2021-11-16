@@ -77,7 +77,7 @@ def readFile(pathStr):
         return strFormat[0], strFormat[1], rdm
     except:
         print("No line in this file")
-    return None, None, None
+        exit()
 
 def checkLangxd(pathFile, checkLang = "lang2"):
     if (args.lang):
@@ -92,6 +92,9 @@ def checkLangxd(pathFile, checkLang = "lang2"):
             result, motATrouver, lineNb = readFile(pathFile)
         else:
             motATrouver, result, lineNb = readFile(pathFile)
+    else:
+        print("Select a valid option please")
+        exit()
     return motATrouver, result, lineNb
 
 def questions(pathFile, tries, failNb, checkLang = "lang1"):
@@ -221,8 +224,6 @@ def base_game(game_speed, file_path):
     if (args.increase):
         add_speed += 0.05
     motATrouver, result, lineNb = checkLangxd(file_path, )
-    if (not motATrouver and not result and not lineNb):
-        exit()
     x, y= random.randint(50, (WIDTH - (len(motATrouver) * 15))), -10
     placement = [(WIDTH / 2), (HEIGHT - margin_down), (WIDTH / 2), (HEIGHT - margin_down) + 3]
     user_input, stored_input = "", ""
