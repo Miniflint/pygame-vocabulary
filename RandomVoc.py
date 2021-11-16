@@ -7,10 +7,11 @@ from datetime import date
 import unicodedata
 
 parser = argparse.ArgumentParser(description="Change la langue ou ajoute ton dictionnaire")
-parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
-parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
-parser.add_argument("-g", "--game", type=str, help="Game :) [hard/medium/easy/EZ]")
 parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
+parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
+parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
+parser.add_argument("-d", "--difficulty", type=str, help="hard/medium/easy/EZ]")
+parser.add_argument("-i", "--increase", action="store_true", help="Ajoute de la difficulté et augmente de la vitesse au fur est a mesure")
 parser.add_argument("-c", "--cc", action="store_true", help=argparse.SUPPRESS)
 args = parser.parse_args()
 
@@ -211,9 +212,12 @@ def remove_accents(input_str):
     only_ascii = nfkd_form.encode('ASCII', 'ignore')
     return only_ascii
 
+add_speed = 0
 def base_game(game_speed, file_path):
-    global FAIL, SUCCESS
+    global FAIL, SUCCESS, add_speed
     margin_down = 100
+    if (args.increase):
+        add_speed += 0.05
     motATrouver, result, lineNb = readFile(file_path)
     if (not motATrouver and not result and not lineNb):
         exit()
@@ -242,11 +246,11 @@ def base_game(game_speed, file_path):
                         stored_input = user_input
                         if (remove_accents(stored_input) == remove_accents(result) and y < placement[1]):
                             SUCCESS += 1
-                            moveLocation(file_path, "success.txt", lineNb)
+                            #moveLocation(file_path, "success.txt", lineNb)
                             screen_win.change_screen()
                         else:
                             FAIL += 1
-                            moveLocation(file_path, "Fail.txt", lineNb)
+                            #moveLocation(file_path, "Fail.txt", lineNb)
                             screen_lose.change_screen()
                     elif (event.key == pygame.K_BACKSPACE):
                         user_input = user_input[:-1]
@@ -256,12 +260,12 @@ def base_game(game_speed, file_path):
         all_kind_of_text(user_answer.display_text(), text_win.display_text(), text_lose.display_text())
         if (y >= placement[1]):
             FAIL += 1
-            moveLocation(file_path, "Fail.txt", lineNb)
+            #moveLocation(file_path, "Fail.txt", lineNb)
             screen_lose.change_screen()
         pygame.draw.rect(SCREEN, COLOR.light_sky, input_rect, 3)
         pygame.draw.line(SCREEN, COLOR.white, (placement[0], placement[1]), (placement[2], placement[3]), (WIDTH - 50))
         pygame.time.delay(game_speed)
-        y += (HEIGHT - margin_down + 10) / 500
+        y += ((HEIGHT - margin_down + 10) / 500) + add_speed
         pygame.display.update()
 
 def main():
@@ -276,10 +280,10 @@ def main():
         base(file_path, args.lang)
         exit()
     else:
-        if (args.game == "hard"):       game_speed = 15
-        elif (args.game == "medium"):   game_speed = 25
-        elif (args.game == "easy"):     game_speed = 35
-        elif (args.game == "EZ"):       game_speed = 5
+        if (args.difficulty == "hard"):       game_speed = 15
+        elif (args.difficulty == "medium"):   game_speed = 25
+        elif (args.difficulty == "easy"):     game_speed = 35
+        elif (args.difficulty == "EZ"):       game_speed = 5
         base_game(game_speed, file_path)
 
 if __name__ == "__main__":
