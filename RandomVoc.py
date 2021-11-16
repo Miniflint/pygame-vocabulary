@@ -6,13 +6,18 @@ import argparse
 from datetime import date
 import unicodedata
 
-parser = argparse.ArgumentParser(description="Change la langue ou ajoute ton dictionnaire")
-parser.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
+parser = argparse.ArgumentParser(description="Choisis comment tu veux reviser")
+parser.add_argument("-g", "--game", action="store_true", help="lance le jeu (defaut)")
 parser.add_argument("-a", "--add", action="store_true",  help="Ajoute ton vocabulaire, Aucun argument")
-parser.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
-parser.add_argument("-d", "--difficulty", type=str, help="[hard/medium/easy/EZ]")
-parser.add_argument("-i", "--increase", action="store_true", help="Ajoute de la difficulté et augmente de la vitesse au fur est a mesure")
-parser.add_argument("-c", "--cc", action="store_true", help=argparse.SUPPRESS)
+parser.add_argument("-cl","--command", action="store_true", help="Ligne de commande")
+
+command_changer = parser.add_subparsers(description="Arguments pour influer sur le programme")
+modifiers = command_changer.add_parser('modifiers', help="launch the program with 'progname.py' modifiers -h' to see the optional argument")
+modifiers.add_argument("-f", "--file", type=str, help="Enter the path to the file [default : ita.txt]")
+modifiers.add_argument("-l", "--lang", type=str, help="Choisis entre lang2:lang1 ou l'inverse | lang2 = trouver lang2 [lang2, lang1, random]")
+modifiers.add_argument("-d", "--difficulty", type=str, help="[EZ/hard/medium/easy]")
+modifiers.add_argument("-i", "--increase", action="store_true", help="Ajoute de la difficulté et augmente de la vitesse au fur est a mesure")
+modifiers.add_argument("-c", "--cc", action="store_true", help=argparse.SUPPRESS)
 args = parser.parse_args()
 
 pygame.init()
@@ -97,10 +102,10 @@ def checkLangxd(pathFile, checkLang = "lang2"):
         exit()
     return motATrouver, result, lineNb
 
-def questions(pathFile, tries, failNb, checkLang = "lang1"):
+def questions(pathFile, tries, failNb):
     tries -= 1
     while (tries >= 0):
-        motATrouver, result, lineNb = checkLangxd(pathFile, checkLang)
+        motATrouver, result, lineNb = checkLangxd(pathFile)
         print("Question : " + motATrouver)
         checkAnswer = input("Réponse : ")
         if (checkAnswer == "GetMeOutSenpai"):
@@ -144,14 +149,14 @@ def add_to_txt(filePath):
             return
         f.write(f"{get_ita}:{get_fra}\n")
 
-def base(file_path, argv = "lang1"):
+def base(file_path):
     numberOfLine = lineInFile(file_path)
     if numberOfLine:
         failNb = 0
-        finish = questions(file_path,numberOfLine, failNb, argv)
+        finish = questions(file_path,numberOfLine, failNb)
         if (finish >= 1):
             while (finish >= 1):
-                questions(f"Fail{failNb}.txt", numberOfLine, failNb, argv)
+                questions(f"Fail{failNb}.txt", numberOfLine, failNb)
                 failNb += 1
 
 class COLOR():
@@ -279,9 +284,9 @@ def main():
     if (args.add):
        add_to_txt(file_path)
        exit()
-    #if (args.lang):
-        #base(file_path, args.lang)
-        #exit()
+    if (args.command):
+        base(file_path)
+        exit()
     else:
         if (args.difficulty == "hard"):       game_speed = 15
         elif (args.difficulty == "medium"):   game_speed = 25
